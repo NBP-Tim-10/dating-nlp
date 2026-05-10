@@ -1,0 +1,38 @@
+# Core libraries
+numpy>=1.26.0
+pandas>=2.2.0,<3.0
+scikit-learn>=1.4.0
+tqdm>=4.66.0
+python-dotenv>=1.0.0
+
+# NLP libraries
+nltk>=3.8.1
+emoji>=2.10.0
+langdetect>=1.0.9
+contractions>=0.1.73
+unidecode>=1.3.7
+ftfy>=6.2.0
+
+# Data repositories access
+kaggle>=1.6.0
+ucimlrepo>=0.0.7
+datasets>=2.18.0
+huggingface_hub>=0.22.0
+
+# Web scraping (Google Play reviews + general scraping)
+google-play-scraper>=1.2.7
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=5.1.0
+
+# Synthetic text generation
+faker>=24.0.0
+
+# Visualization (EDA)
+matplotlib>=3.8.0
+seaborn>=0.13.0
+wordcloud>=1.9.3
+
+# Notebook
+jupyter>=1.0.0
+ipykernel>=6.29.0
