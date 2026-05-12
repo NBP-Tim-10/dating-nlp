@@ -1,28 +1,27 @@
 # Dubinska analiza podataka — NLP za dating aplikacije
 
-Projekat za predmet *Dubinska analiza podataka* (ETF Sarajevo).
+Projekat za predmet _Dubinska analiza podataka_ (ETF Sarajevo).
+
 Cilj: primjena pet NLP rješenja na korisničko iskustvo i sigurnost
 dating aplikacija (Tinder/Bumble/Hinge…).
 
-Ovaj repozitorij pokriva **tačku 1 plana rada** iz specifikacije:
-**prikupljanje, sintetičko stvaranje i preprocesiranje podataka** za
-sve NLP taskove. Modeliranje (tačka 2) ide u zasebne notebook-e.
+Repozitorij pokriva prikupljanje, sintetičko stvaranje i preprocesiranje
+podataka za sve NLP taskove.
 
 ---
 
 ## Mapiranje NLP taskova → izvori podataka
 
-| # | NLP Task | Primarni dataset | Dopunski / sintetički |
-|---|----------|------------------|------------------------|
-| 1 | Sistem za preporučivanje (bio embeddings) | OkCupid Profiles (Kaggle) | — |
-| 2 | Identifikacija govora mržnje | Davidson 2017 (GitHub) + `tweet_eval/hate` (HF) | — |
-| 3 | Modeliranje tema / Icebreakers | OkCupid Profiles (Kaggle) | Sintetički icebreaker parovi |
-| 4 | Detekcija prevara / botova | SMS Spam Collection (UCI) | Sintetički romance-scam profili |
-| 5 | Dinamička analiza sentimenta i emocija | Google Play recenzije (Tinder/Bumble/Hinge/CMB) | Sintetički razgovori sa progresijom emocija |
+| #   | NLP Task                                  | Primarni dataset                                | Dopunski / sintetički                       |
+| --- | ----------------------------------------- | ----------------------------------------------- | ------------------------------------------- |
+| 1   | Sistem za preporučivanje (bio embeddings) | OkCupid Profiles (Kaggle)                       | —                                           |
+| 2   | Identifikacija govora mržnje              | Davidson 2017 (GitHub) + `tweet_eval/hate` (HF) | —                                           |
+| 3   | Modeliranje tema / Icebreakers            | OkCupid Profiles (Kaggle)                       | Sintetički icebreaker parovi                |
+| 4   | Detekcija prevara / botova                | SMS Spam Collection (UCI)                       | Sintetički romance-scam profili             |
+| 5   | Dinamička analiza sentimenta i emocija    | Google Play recenzije (Tinder/Bumble/Hinge/CMB) | Sintetički razgovori sa progresijom emocija |
 
-Više datasetova je opravdano — kako i specifikacija kaže, *jedan dataset
-ne može pokriti sve taskove* (npr. bot detekcija traži kratke poruke,
-preporuke traže duge bio sekcije).
+Više datasetova je nužno — _jedan dataset ne može pokriti sve taskove_
+(bot detekcija traži kratke poruke, preporuke traže duge bio sekcije).
 
 ---
 
@@ -115,30 +114,26 @@ python -m src.preprocessing.preprocess_hate_speech
 
 ### 1. Prikupljanje (`src/data_collection/`)
 
-| Skripta | Izvor | Izlaz |
-|---------|-------|-------|
-| `download_okcupid.py` | Kaggle: `andrewmvd/okcupid-profiles` | `data/raw/okcupid/okcupid_profiles.csv` |
-| `download_hate_speech.py` | GitHub raw + Hugging Face `tweet_eval` | `data/raw/hate_speech/hate_combined.csv` |
-| `download_sms_spam.py` | UCI ML Repository | `data/raw/sms_spam/sms_spam.csv` |
+| Skripta                    | Izvor                                          | Izlaz                                         |
+| -------------------------- | ---------------------------------------------- | --------------------------------------------- |
+| `download_okcupid.py`      | Kaggle: `andrewmvd/okcupid-profiles`           | `data/raw/okcupid/okcupid_profiles.csv`       |
+| `download_hate_speech.py`  | GitHub raw + Hugging Face `tweet_eval`         | `data/raw/hate_speech/hate_combined.csv`      |
+| `download_sms_spam.py`     | UCI ML Repository                              | `data/raw/sms_spam/sms_spam.csv`              |
 | `scrape_tinder_reviews.py` | Google Play Store (Tinder, Bumble, Hinge, CMB) | `data/raw/app_reviews/dating_app_reviews.csv` |
 
 ### 2. Sintetičko generisanje (`generate_synthetic.py`)
 
 Razlozi:
+
 - Nedostaju javne baze sa romance scam profilima iz dating aplikacija.
-- Trebamo *kontrolisane* labele za fine-grained emocije
+- Trebamo _kontrolisane_ labele za fine-grained emocije
   (frustracija, sarkazam, pad interesovanja).
 
 Output:
+
 - `data/synthetic/scam_profiles.csv` — 1500 legit + 1500 scam bio
 - `data/synthetic/icebreaker_pairs.csv` — 1200 (bio_a, bio_b, icebreaker)
 - `data/synthetic/conversations.csv` — ~600 razgovora po šablonima
-
-> **Napomena za izvještaj:** sintetički podaci su namjerno šablonski
-> kako bi labele bile pouzdane. U sljedećoj iteraciji preporučujemo
-> diversifikaciju kroz LLM (npr. lokalni Llama-3 ili API GPT-4) sa
-> few-shot prompt-om — kostur skripte je već spreman u
-> `generate_synthetic.py`.
 
 ### 3. Preprocesiranje (`src/preprocessing/`)
 
@@ -160,19 +155,19 @@ Sve tri pipelines rade:
 4. Smanjenje ponovljenih karaktera (`soooo` → `soo`)
 5. Skidanje interpunkcije (osim u sentiment pipeline-u)
 6. NLTK tokenizacija + stop-words filter (engleska osnova,
-   *zadržavamo negacije* tipa `not`, `never`)
+   _zadržavamo negacije_ tipa `not`, `never`)
 7. WordNet lematizacija
 
 Output (u `data/processed/`):
 
-| Task | Fajl |
-|------|------|
-| Preporuke | `bios_for_embeddings.csv` |
-| Topics | `bios_for_topics.csv` |
-| Govor mržnje | `hate_speech_clean.csv` + `_train/_val/_test.csv` |
-| Scam/bot | `scam_detection_clean.csv` + `_train/_val/_test.csv` |
+| Task                | Fajl                                                    |
+| ------------------- | ------------------------------------------------------- |
+| Preporuke           | `bios_for_embeddings.csv`                               |
+| Topics              | `bios_for_topics.csv`                                   |
+| Govor mržnje        | `hate_speech_clean.csv` + `_train/_val/_test.csv`       |
+| Scam/bot            | `scam_detection_clean.csv` + `_train/_val/_test.csv`    |
 | Sentiment recenzije | `sentiment_reviews_clean.csv` + `_train/_val/_test.csv` |
-| Sentiment razgovori | `sentiment_conversations_clean.csv` |
+| Sentiment razgovori | `sentiment_conversations_clean.csv`                     |
 
 Stratifikovani 70/15/15 split koristi `sklearn.model_selection.train_test_split`
 sa `random_state=42` zbog reproducibilnosti.
@@ -184,6 +179,7 @@ jupyter notebook notebooks/01_eda.ipynb
 ```
 
 Notebook prikazuje:
+
 - distribucije dužine teksta i broj tokena
 - balans klasa po taskovima i izvorima
 - top frekventne tokene u bios
@@ -201,7 +197,7 @@ Notebook prikazuje:
   `userName` koloni može biti puno ime. U procesiranom CSV-u zadržavamo
   samo `app`, `rating`, `text` i izvedene kolone.
 - **Sintetički scam tekstovi**: koriste Faker-ovo nasumično generisanje
-  (`name`, `phone`, `email`) — *nisu* stvarni ljudski podaci.
+  (`name`, `phone`, `email`) — _nisu_ stvarni ljudski podaci.
 - **Hate speech (Davidson)**: tweet-ovi su javni i već anonimizirani od
   strane autora dataseta.
 
@@ -211,21 +207,21 @@ Notebook prikazuje:
 
 - Sve random operacije postavljaju `random_state=42` (sklearn) ili
   `Faker.seed(42) / random.Random(42)`.
-- `requirements.txt` fiksira *minimalne* verzije — za 100% repro
+- `requirements.txt` fiksira _minimalne_ verzije — za 100% repro
   preporučljivo je generisati `pip freeze > requirements.lock.txt` na
   kraju ciklusa.
 
 ---
 
-## Sljedeći koraci (faza 2 plana rada)
+## Mapiranje članova tima na NLP taskove
 
-Nakon ove faze, svaki član tima preuzima svoj NLP zadatak i koristi
-odgovarajuće `data/processed/*.csv` kao ulaz:
+Svaki član tima radi na svom NLP tasku, koristeći odgovarajuće
+`data/processed/*.csv` fajlove kao ulaz:
 
-| Član | Task | Ulazni fajl(ovi) |
-|------|------|------------------|
-| Sistem preporuka | `bios_for_embeddings.csv` |
-| Govor mržnje | `hate_speech_{train,val,test}.csv` |
-| Topic modeling / icebreakers | `bios_for_topics.csv` + `icebreaker_pairs.csv` |
-| Bot/scam detekcija | `scam_detection_{train,val,test}.csv` |
-| Sentiment + emocije | `sentiment_reviews_*.csv` + `sentiment_conversations_clean.csv` |
+| Član                         | Task                                                            | Ulazni fajl(ovi) |
+| ---------------------------- | --------------------------------------------------------------- | ---------------- |
+| Sistem preporuka             | `bios_for_embeddings.csv`                                       |
+| Govor mržnje                 | `hate_speech_{train,val,test}.csv`                              |
+| Topic modeling / icebreakers | `bios_for_topics.csv` + `icebreaker_pairs.csv`                  |
+| Bot/scam detekcija           | `scam_detection_{train,val,test}.csv`                           |
+| Sentiment + emocije          | `sentiment_reviews_*.csv` + `sentiment_conversations_clean.csv` |
