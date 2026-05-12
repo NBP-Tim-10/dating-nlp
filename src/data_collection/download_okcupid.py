@@ -18,7 +18,11 @@ import sys
 import zipfile
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from src.utils.paths import RAW_DIR
+
+load_dotenv()
 
 DATASET_SLUG = "andrewmvd/okcupid-profiles"
 TARGET_DIR = RAW_DIR / "okcupid"
