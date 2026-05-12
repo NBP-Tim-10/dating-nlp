@@ -75,14 +75,23 @@ python -m src.utils.nltk_setup
 
 ### Kaggle kredencijali (OkCupid)
 
-OkCupid dataset se preuzima preko Kaggle API-ja:
+OkCupid dataset se preuzima preko Kaggle API-ja. Potrebno je jednom prihvatiti uslove dataseta na
+[andrewmvd/okcupid-profiles](https://www.kaggle.com/datasets/andrewmvd/okcupid-profiles)
+(kliknuti **I Understand and Accept**), a kredencijale postaviti na jedan od dva načina:
 
-1. Otvoriti [kaggle.com](https://www.kaggle.com/) → **Account** → **Create New API Token**.
-2. Spustiti `kaggle.json` u `%USERPROFILE%\.kaggle\kaggle.json`
-   (na Windows: `C:\Users\<vase_ime>\.kaggle\kaggle.json`).
-3. Prihvatiti uslove dataseta na
-   [andrewmvd/okcupid-profiles](https://www.kaggle.com/datasets/andrewmvd/okcupid-profiles)
-   (jednom kliknuti **I Understand and Accept**).
+**Opcija A — `.env` fajl**
+
+```powershell
+copy .env.example .env
+# otvoriti .env i upisati username i key
+```
+
+Username i API key se nalaze na [kaggle.com](https://www.kaggle.com/) → **Settings** → **API**.
+
+**Opcija B — `kaggle.json`**
+
+Preuzeti token sa iste stranice (**Create New API Token**) i smjestiti ga na:
+`C:\Users\<ime>\.kaggle\kaggle.json`
 
 ---
 
