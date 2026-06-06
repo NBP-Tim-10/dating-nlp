@@ -39,3 +39,5 @@ wordcloud>=1.9.3
 # Notebook
 jupyter>=1.0.0
 ipykernel>=6.29.0
+
+streamlit>=1.35.0
