@@ -168,7 +168,14 @@ def _get_stopwords() -> set[str]:
     if _STOPWORDS_CACHE is None:
         from nltk.corpus import stopwords
 
-        _STOPWORDS_CACHE = set(stopwords.words("english"))
+        try:
+            _STOPWORDS_CACHE = set(stopwords.words("english"))
+        except LookupError:
+            import nltk
+
+            nltk.download("stopwords", quiet=True)
+            _STOPWORDS_CACHE = set(stopwords.words("english"))
+
         _STOPWORDS_CACHE -= {
             "no", "not", "nor", "never",
             "very", "too", "more", "most",
@@ -187,9 +194,22 @@ def _get_lemmatizer():
 
 
 def tokenize(text: str) -> list[str]:
+    """Tokenizacija teksta.
+
+    preserve_line=True izbjegava dodatnu sentence tokenizaciju,
+    pa je stabilnije za naš pipeline i manje zavisi od punkt_tab resursa.
+    Ako NLTK resurs ipak nedostaje, automatski ga preuzima.
+    """
     from nltk.tokenize import word_tokenize
 
-    return word_tokenize(text)
+    try:
+        return word_tokenize(text, preserve_line=True)
+    except LookupError:
+        import nltk
+
+        nltk.download("punkt", quiet=True)
+        nltk.download("punkt_tab", quiet=True)
+        return word_tokenize(text, preserve_line=True)
 
 
 def remove_stopwords(tokens: Iterable[str]) -> list[str]:
@@ -199,7 +219,16 @@ def remove_stopwords(tokens: Iterable[str]) -> list[str]:
 
 def lemmatize(tokens: Iterable[str]) -> list[str]:
     lem = _get_lemmatizer()
-    return [lem.lemmatize(t) for t in tokens]
+    tokens = list(tokens)
+
+    try:
+        return [lem.lemmatize(t) for t in tokens]
+    except LookupError:
+        import nltk
+
+        nltk.download("wordnet", quiet=True)
+        nltk.download("omw-1.4", quiet=True)
+        return [lem.lemmatize(t) for t in tokens]
 
 
 def full_token_pipeline(
