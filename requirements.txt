@@ -39,3 +39,7 @@ ipykernel>=6.29.0
 
 # Recommendation / contextual embeddings
 sentence-transformers>=2.7.0
+torchvision
+
+# UI
+streamlit>=1.35.0
