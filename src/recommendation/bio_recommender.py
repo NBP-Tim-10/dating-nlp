@@ -220,7 +220,8 @@ class BioRecommender:
 
         result = self.data.iloc[top_indices][cols].copy()
         result.insert(0, "rank", range(1, len(result) + 1))
-        result.insert(1, "similarity_score", scores[top_indices].round(4))
+        rounded_scores = [round(float(score), 4) for score in scores[top_indices]]
+        result.insert(1, "similarity_score", rounded_scores)
         result["bio_preview"] = result["bio_raw"].apply(_preview)
 
         if "bio_raw" in result.columns:

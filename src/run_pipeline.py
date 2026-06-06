@@ -1,15 +1,18 @@
 """Master skripta - pokreće cijeli pipeline prikupljanja i preprocesiranja.
 
 Pokretanje:
-    python -m src.run_pipeline               # sve faze
-    python -m src.run_pipeline --skip-scrape # bez Google Play scraping-a
+    python -m src.run_pipeline                    # collect + synthetic + preprocess
+    python -m src.run_pipeline --skip-scrape      # bez Google Play scraping-a
     python -m src.run_pipeline --only collect
+    python -m src.run_pipeline --only synthetic
     python -m src.run_pipeline --only preprocess
+    python -m src.run_pipeline --only recommendation
 
 Faze:
-    1) collect      - download i scraping svih izvora
-    2) synthetic    - sintetičko generisanje
-    3) preprocess   - čišćenje, tokenizacija, lematizacija
+    1) collect        - download i scraping svih izvora
+    2) synthetic      - sintetičko generisanje
+    3) preprocess     - čišćenje, tokenizacija, lematizacija
+    4) recommendation - demo i evaluacija bio recommender sistema
 """
 from __future__ import annotations
 
@@ -61,13 +64,32 @@ def preprocess() -> None:
     _run("Preprocess: scam/bot detection", p_scam)
     _run("Preprocess: sentiment & emocije", p_sent)
 
+def recommendation() -> None:
+    from src.recommendation.run_bio_recommendation_demo import run_demo
+    from src.recommendation.evaluate_bio_recommender import run_evaluation
+
+    _run("Recommendation: bio recommender demo", lambda: run_demo(
+        profile_indices=[0, 10, 25],
+        top_k=5,
+        max_profiles=5000,
+    ))
+
+    _run("Recommendation: bio recommender evaluacija", lambda: run_evaluation(
+        max_profiles=5000,
+        n_queries=30,
+        top_k=5,
+        random_state=42,
+    ))
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Master pipeline")
     parser.add_argument("--skip-scrape", action="store_true",
                         help="Preskoči Google Play scraping recenzija.")
-    parser.add_argument("--only", choices=["collect", "synthetic", "preprocess"],
-                        help="Pokreni samo jednu fazu.")
+    parser.add_argument(
+        "--only",
+        choices=["collect", "synthetic", "preprocess", "recommendation"],
+        help="Pokreni samo jednu fazu.",
+    )
     args = parser.parse_args()
 
     if args.only == "collect":
@@ -76,6 +98,8 @@ def main() -> None:
         synthetic()
     elif args.only == "preprocess":
         preprocess()
+    elif args.only == "recommendation":
+        recommendation()
     else:
         collect(skip_scrape=args.skip_scrape)
         synthetic()
