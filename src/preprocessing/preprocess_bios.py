@@ -57,6 +57,10 @@ def merge_essays(df: pd.DataFrame) -> pd.Series:
 
 def run() -> dict[str, Path]:
     df = load()
+    # Čuvamo originalni red iz OkCupid CSV-a kao stabilan ID profila.
+    # Ovo nam kasnije treba za preporučivanje i prikaz rezultata.
+    if "profile_id" not in df.columns:
+        df = df.reset_index().rename(columns={"index": "profile_id"})
     df["bio_raw"] = merge_essays(df)
     df = df[df["bio_raw"].str.len() > 50].copy()
     print(f"[bios] nakon filtera dužine: {len(df)}")
@@ -81,9 +85,31 @@ def run() -> dict[str, Path]:
     )
     df["tokens_str"] = df["tokens"].apply(lambda toks: " ".join(toks))
 
+    # keep_cols = [
+    #     "bio_raw", "bio_clean", "tokens_str",
+    #     "age", "sex", "orientation", "status", "lang",
+    # ]
     keep_cols = [
-        "bio_raw", "bio_clean", "tokens_str",
-        "age", "sex", "orientation", "status", "lang",
+        "profile_id",
+        "bio_raw",
+        "bio_clean",
+        "tokens_str",
+        "age",
+        "sex",
+        "orientation",
+        "status",
+        "body_type",
+        "diet",
+        "drinks",
+        "drugs",
+        "education",
+        "job",
+        "location",
+        "pets",
+        "religion",
+        "smokes",
+        "speaks",
+        "lang",
     ]
     keep_cols = [c for c in keep_cols if c in df.columns]
 

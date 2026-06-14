@@ -38,7 +38,17 @@ dap/
 ├── notebooks/
 │   └── 01_eda.ipynb
 ├── reports/         # statistike, distribucije, kasnije evaluacije
+│   └── recommendation/
+│       ├── bio_recommendation_demo_results.csv
+│       ├── bio_recommendation_evaluation_details.csv
+│       └── bio_recommendation_evaluation_summary.csv    
 └── src/
+    ├── recommendation/
+    │   ├── bio_recommender.py
+    │   ├── run_bio_recommendation_demo.py
+    │   └── evaluate_bio_recommender.py
+    ├── ui/
+    │   └── recommendation_app.py
     ├── data_collection/
     │   ├── download_okcupid.py
     │   ├── download_hate_speech.py
@@ -234,3 +244,91 @@ Svaki član tima radi na svom NLP tasku, koristeći odgovarajuće
 | Topic modeling / icebreakers | `bios_for_topics.csv` + `icebreaker_pairs.csv`                  |
 | Bot/scam detekcija           | `scam_detection_{train,val,test}.csv`                           |
 | Sentiment + emocije          | `sentiment_reviews_*.csv` + `sentiment_conversations_clean.csv` |
+
+---
+
+## Task 1: Sistem za preporučivanje profila na osnovu bio embeddings
+
+Ovaj task implementira content-based sistem za preporučivanje profila u dating aplikaciji. Sistem koristi tekstualne bio opise korisnika iz OkCupid Profiles dataseta i vraća top-N najsličnijih profila.
+
+Za reprezentaciju teksta koriste se dvije forme prikaza:
+
+1. **TF-IDF reprezentacija** — klasična sparse reprezentacija teksta.
+2. **SBERT sentence embeddings** — duboko kontekstualna reprezentacija teksta.
+
+Obje metode koriste **cosine similarity** za rangiranje kandidata.
+
+### Ulazni fajl
+
+Preporučivački sistem koristi preprocesirani fajl:
+
+```text
+data/processed/bios_for_embeddings.csv
+Ovaj fajl nastaje pokretanjem:
+
+python -m src.preprocessing.preprocess_bios
+
+ili kroz kompletan preprocessing pipeline:
+
+python -m src.run_pipeline --only preprocess
+Pokretanje recommender sistema iz terminala
+
+Primjer preporuka za postojeći profil:
+
+python -m src.recommendation.bio_recommender --method both --index 0 --top-k 5 --max-profiles 1000
+
+Dostupne metode su:
+
+tfidf
+sbert
+both
+
+Primjer sa samo TF-IDF metodom:
+
+python -m src.recommendation.bio_recommender --method tfidf --index 0 --top-k 5 --max-profiles 5000
+
+Primjer sa SBERT metodom:
+
+python -m src.recommendation.bio_recommender --method sbert --index 0 --top-k 5 --max-profiles 1000
+Demo rezultati
+
+Za generisanje CSV fajla sa demo preporukama:
+
+python -m src.recommendation.run_bio_recommendation_demo
+
+Output se snima u:
+
+reports/recommendation/bio_recommendation_demo_results.csv
+Evaluacija recommender sistema
+
+Pošto OkCupid dataset ne sadrži stvarne match/rating labele, koristi se proxy evaluacija. Sistem se poredi sa random baseline-om kroz metapodatke preporučenih profila, npr. sličnost po gradu, statusu, orijentaciji, obrazovanju, poslu i prosječnoj razlici u godinama.
+
+Pokretanje evaluacije:
+
+python -m src.recommendation.evaluate_bio_recommender --max-profiles 1000 --n-queries 50 --top-k 5
+
+Output fajlovi:
+
+reports/recommendation/bio_recommendation_evaluation_details.csv
+reports/recommendation/bio_recommendation_evaluation_summary.csv
+Streamlit UI
+
+Za demonstraciju taska kroz grafički interfejs:
+
+python -m streamlit run src/ui/recommendation_app.py
+
+UI omogućava:
+
+izbor postojećeg profila iz dataseta,
+unos novog bio teksta,
+izbor metode: TF-IDF, SBERT ili obje metode,
+prikaz top-N preporučenih profila.
+
+Za prezentaciju je preporučeno koristiti:
+
+Broj profila za demo: 1000
+Broj preporuka: 5
+Metoda: Obje metode
+Način unosa: Postojeći profil
+Index profila: 0
+```
