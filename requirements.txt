@@ -46,3 +46,7 @@ torchvision
 
 # UI
 streamlit>=1.35.0
+
+# Icebreaker pipeline
+anthropic>=0.34.0
+openai>=1.30.0
